@@ -18,14 +18,72 @@ E4
 '''
 
 class Solution:
+    '''
     def decodeString(self, s: str) -> str:
         index, decodeStack = 0, []
-        # encode_string, decode_string, repeat_number
         while index < len(s):
             # push
-            if s[index] != ']':
+            if s[index] == ']':
+                decodeStack.append(']')
+            elif s[index].isalnum():
+                decodeStack.append(s[index])
+            index += 1
 
-            elif s[index].isdigit():
-                    repeat_number = int(s[index])
+            # pop, operation then push
+            if decodeStack and decodeStack[-1] == ']':
+                # discard ']'
+                decodeStack.pop()
+                # get encode_string, repeat_number and calculate decode_string
+                decode_string = decodeStack.pop()
+                while decodeStack and decodeStack[-1].isalpha():
+                    decode_string = decodeStack.pop() + decode_string
+                repeat_number, times = 0, 1
+                while decodeStack and decodeStack[-1].isdigit():
+                    repeat_number += (int)(decodeStack.pop()) * times
+                    times *= 10
+                decode_string = decode_string * repeat_number
+                decodeStack.append(decode_string)
 
-            # pop
+        # read decode_string from the stack
+        result = ""
+        for decode_str in decodeStack:
+            result += decode_str
+        return result
+    '''
+
+    def decodeString(self, s: str) -> str:
+        index, decodeStack = 0, []
+        while index < len(s):
+            # push
+            decodeStack.append(s[index])
+            index += 1
+
+            # pop -> decode -> push
+            if decodeStack and decodeStack[-1] == ']':
+                decodeStack.pop() # discard ']'
+                # get enc_str, repeats and calculate dec_str
+                enc_str = decodeStack.pop()
+                while decodeStack and decodeStack[-1].isalpha():
+                    enc_str = decodeStack.pop() + enc_str
+                decodeStack.pop() # discard '['
+                repeats, times = 0, 1
+                while decodeStack and decodeStack[-1].isdigit():
+                    repeats += (int)(decodeStack.pop()) * times
+                    times *= 10
+                dec_str = enc_str * repeats
+                decodeStack.append(dec_str)
+
+        #read result from decodeStack
+        result = ""
+        for dec_str in decodeStack:
+            result += dec_str
+        return result
+
+
+
+if __name__ == "__main__":
+    obj = Solution()
+    input = ["2[a]2[bc]", "3[a2[c]]", "2[abc]13[cd]ef", "abc3[cd]xyz"]
+    for encoded_str in input:
+        decoded_str = obj.decodeString(encoded_str)
+        print(decoded_str)
